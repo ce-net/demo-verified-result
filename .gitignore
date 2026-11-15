@@ -1,2 +1,4 @@
 target/
 node-run-out/
+target-wasm/
+runs/

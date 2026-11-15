@@ -10,14 +10,14 @@ POOL=${POOL:-pool/example.json}
 BIN=${BIN:-}
 mr="${BIN}compute-mapreduce"; issue="${BIN}cert-issue"; verify="${BIN}cert-verify"
 commit=$(git log -1 --format=%H -- crates/fem-core/src/lib.rs 2>/dev/null || true)
-mkdir -p web/certs
+mkdir -p web/certs runs
 inputs=$(python3 -c 'import json;print(json.dumps([c["input"] for c in json.load(open("cases/cases.json"))]))')
-echo "{\"map\":\"physics.fem@1.Solve\",\"inputs\":$inputs,\"replicas\":2,\"pool_file\":\"$POOL\"}" | $mr > web/certs/.mapreduce.json
+echo "{\"map\":\"physics.fem@1.Solve\",\"inputs\":$inputs,\"replicas\":2,\"pool_file\":\"$POOL\"}" | $mr > runs/last-mapreduce.json
 python3 - "$commit" "${BLOBS:-}" <<'PY'
 import json, os, subprocess, sys
 commit, blobs = sys.argv[1], sys.argv[2]
 cases = json.load(open("cases/cases.json"))
-mr = json.load(open("web/certs/.mapreduce.json"))
+mr = json.load(open("runs/last-mapreduce.json"))
 if "error" in mr: sys.exit("compute.mapreduce: " + mr["error"])
 index, issuer = [], None
 for case, run in zip(cases, mr["runs"]):

@@ -16,7 +16,7 @@
   .wrap{max-width:var(--max);margin:0 auto;padding:8px var(--m) 48px}
   .lede{max-width:64ch;color:var(--ink-2);font-size:var(--t-md);margin:0 0 18px}
   .pills{flex-wrap:wrap;max-width:100%}
-  .grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:10px;margin-top:10px}
+  .grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:10px;margin-top:10px;align-items:start}
   .card{padding:14px 14px 12px}
   .card h2{margin:0 0 10px;font:500 var(--t-2xs) var(--sans);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:6px}
   .card h2 i{width:6px;height:6px;border-radius:50%;background:var(--acc)}
@@ -172,7 +172,7 @@
     let s = "";
     for (let k = 0; k <= 4; k++) { const v = max * k / 4; s += `<line class="grid" x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l - 6}" y="${Y(v) + 3}" text-anchor="end">${fmt(v, v < 1 ? 2 : 1)}</text>` }
     for (let k = 0; k <= 4; k++) { const x = L * k / 4; s += `<text x="${X(x)}" y="${H - b + 16}" text-anchor="middle">${Math.round(x)}</text>` }
-    s += `<text x="${W - r}" y="${H - 4}" text-anchor="end">x, mm</text><text x="${l - 6}" y="${t - 4}" text-anchor="end">mm</text>`;
+    s += `<text x="${W - r}" y="${H - 4}" text-anchor="end">x, mm</text><text x="${l + 6}" y="${H - b - 6}">deflection, mm (down)</text>`;
     s += `<line class="axis" x1="${l}" x2="${W - r}" y1="${t}" y2="${t}"/><line class="axis" x1="${l}" x2="${l}" y1="${t}" y2="${H - b}"/>`;
     let d = "";
     for (let k = 0; k <= 120; k++) { const x = L * k / 120, v = P * x * x * (3 * L - x) / (6 * E * I); d += (k ? "L" : "M") + X(x).toFixed(1) + " " + Y(v).toFixed(1) }

@@ -11,9 +11,14 @@ Live page: https://ce-net.com/demos/verified
 
 ## What was shown (2026-11-15)
 
-| Load case | Mesh | FEM tip deflection | Euler-Bernoulli | Difference | Output hash, x86_64 = aarch64 = wasm32 |
-|---|---|---|---|---|---|
-| see [docs/RESULTS.md](docs/RESULTS.md) | | | | | |
+| Load case | Mesh | FEM tip | Euler-Bernoulli tip | Difference | Stress FEM / M c / I | Output hash, x86_64 = aarch64 = wasm32 |
+|---|---|---|---|---|---|---|
+| Crane runway bracket | 80 x 8 | 1.9153 mm | 1.9048 mm | 0.55 % | 15.00 / 15.00 MPa | `69c17da8277194dc` |
+| Conveyor side rail | 100 x 8 | 4.1978 mm | 4.1853 mm | 0.30 % | 11.72 / 11.72 MPa | `1f54228d8d720894` |
+| Robot gripper finger | 60 x 6 | 0.5743 mm | 0.5714 mm | 0.50 % | 10.00 / 10.00 MPa | `91cb0b7c8e9039b2` |
+| Parts shelf arm | 40 x 4 | 3.2457 mm | 3.2323 mm | 0.41 % | 4.44 / 4.44 MPa | `04524592c2af00e8` |
+
+Details and the tamper runs: [docs/RESULTS.md](docs/RESULTS.md).
 
 - Two independent devices, an ARM server (aarch64 Linux) and an x86_64 desktop (x86_64 Linux), produced
   the same output content id for every case. The same id comes out of the wasm build in the browser.

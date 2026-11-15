@@ -1,0 +1,22 @@
+[
+ {
+  "id": "crane-bracket",
+  "title": "Crane runway bracket",
+  "sub": "Steel, 2.0 m arm, 200 x 100 mm section, 10 kN at the tip"
+ },
+ {
+  "id": "conveyor-rail",
+  "title": "Conveyor side rail",
+  "sub": "Aluminium, 1.5 m overhang, 120 x 40 mm, 1.5 kN"
+ },
+ {
+  "id": "gripper-finger",
+  "title": "Robot gripper finger",
+  "sub": "Aluminium, 300 mm, 30 x 20 mm, 200 N"
+ },
+ {
+  "id": "shelf-arm",
+  "title": "Parts shelf arm",
+  "sub": "Spruce, 600 mm, 60 x 45 mm, 400 N"
+ }
+]
