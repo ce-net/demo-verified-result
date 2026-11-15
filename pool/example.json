@@ -1,0 +1,4 @@
+[
+  {"name": "this-machine", "cmd": ["physics-fem"]},
+  {"name": "second-machine", "cmd": ["ssh", "my-other-box", "~/.local/bin/physics-fem"]}
+]

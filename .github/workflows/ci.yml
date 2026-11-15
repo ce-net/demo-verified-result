@@ -1,0 +1,16 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add wasm32-unknown-unknown
+      - run: cargo test --workspace --locked
+      - run: cargo build --release --locked --target wasm32-unknown-unknown -p verify-wasm
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node tests/wasm-verify.mjs target/wasm32-unknown-unknown/release/verify_wasm.wasm web/certs/crane-bracket.json web/certs/conveyor-rail.json web/certs/gripper-finger.json web/certs/shelf-arm.json

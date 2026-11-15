@@ -1,0 +1,16 @@
+[package]
+name = "verify-wasm"
+description = "cert.verify@1 and physics.fem@1 for the browser: wasm32 build of the same source"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cert-core = { path = "../cert-core" }
+fem-core = { path = "../fem-core" }
+serde_json = "1"

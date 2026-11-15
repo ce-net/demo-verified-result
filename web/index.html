@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070807">
+<title>Verified Result</title>
+<meta name="description" content="Two machines compute a beam deflection by FEM and sign it; your browser re-checks the signatures and re-runs the solver.">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<script>try{if(localStorage.getItem("ce-theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}</script>
+<style>
+  body{min-height:100vh;background:var(--ground)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px var(--m)}
+  .brand{font:400 13px var(--disp);letter-spacing:.1em;color:var(--ink);text-decoration:none;text-transform:uppercase}
+  .wrap{max-width:var(--max);margin:0 auto;padding:8px var(--m) 48px}
+  .lede{max-width:64ch;color:var(--ink-2);font-size:var(--t-md);margin:0 0 18px}
+  .pills{flex-wrap:wrap;max-width:100%}
+  .grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:10px;margin-top:10px}
+  .card{padding:14px 14px 12px}
+  .card h2{margin:0 0 10px;font:500 var(--t-2xs) var(--sans);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+  .card h2 i{width:6px;height:6px;border-radius:50%;background:var(--acc)}
+  .stats{margin-top:14px}
+  .stats+.stats{margin-top:6px}
+  svg.plot{width:100%;height:auto;display:block}
+  svg.plot text{font:400 10px var(--mono);fill:var(--ink-3)}
+  svg.plot .axis{stroke:var(--line-2)}
+  svg.plot .grid{stroke:var(--line)}
+  svg.plot .eb{fill:none;stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:4 3}
+  svg.plot .fem{fill:var(--acc)}
+  svg.plot .beam{fill:none;stroke:var(--acc);stroke-width:1.2}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font:400 10px var(--mono);color:var(--ink-2);margin-top:6px}
+  .legend b{display:inline-block;width:14px;height:0;border-top:1.2px dashed var(--ink-2);vertical-align:middle;margin-right:6px}
+  .legend b.f{border:0;width:6px;height:6px;border-radius:50%;background:var(--acc)}
+  .rows{margin:0}
+  .rows div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+  .rows div:first-child{border-top:0}
+  .rows dt{font:500 var(--t-2xs) var(--sans);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-2)}
+  .rows dd{margin:0;font:400 11px/1.45 var(--mono);color:var(--ink);overflow-wrap:anywhere}
+  .rows dd small{color:var(--ink-3)}
+  .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .checks{list-style:none;margin:0;padding:0}
+  .checks li{display:grid;grid-template-columns:10px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);font:400 11px/1.45 var(--mono)}
+  .checks li:first-child{border-top:0}
+  .checks li i{width:6px;height:6px;border-radius:50%;margin-top:5px;background:var(--ink-3)}
+  .checks li.ok i{background:var(--live)}.checks li.bad i{background:var(--bad)}
+  .checks li b{font-weight:500;color:var(--ink)}
+  .checks li span{color:var(--ink-2);display:block;overflow-wrap:anywhere}
+  .verdict{font:500 var(--t-num)/1 var(--mono);margin:4px 0 10px;color:var(--ink-3)}
+  .verdict.ok{color:var(--live)}.verdict.bad{color:var(--bad)}
+  textarea{width:100%;min-height:220px;resize:vertical;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;font:400 11px/1.45 var(--mono)}
+  .note{font:400 10px/1.5 var(--mono);color:var(--ink-3);margin:8px 0 0}
+  .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+  .how p{margin:0;color:var(--ink-2);font-size:var(--t-sm)}
+  .how code{font:400 11px var(--mono);color:var(--ink)}
+  .credits{position:static;margin-top:24px;font:400 10px var(--mono);color:var(--ink-3)}
+  .credits a{color:var(--ink-2)}
+  .err{color:var(--bad);font:400 11px var(--mono)}
+  @media (max-width:820px){.grid,.how{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:520px){.stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.stats .stat:first-child{grid-column:1/-1}
+    .rows div{grid-template-columns:minmax(0,1fr);gap:2px}.num{font-size:18px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="https://ce-net.com">ce</a>
+  <nav class="btns glass"><a class="btn quiet" href="https://github.com/ce-net/demo-verified-result">Source</a>
+    <button class="btn" id="theme" aria-label="Switch light or dark">Light</button></nav>
+</header>
+<main class="wrap">
+  <div class="crumb">ce-net / Demos / <b>Verified result</b></div>
+  <h1 class="display">An engineering result you can re-check.</h1>
+  <p class="lede">Two different machines computed this beam by the finite element method, got the same bytes, and signed them. Press verify: your browser checks every signature and runs the same solver itself, compiled to WebAssembly from the same source.</p>
+
+  <div class="pills" role="group" aria-label="Load case" id="cases"></div>
+
+  <div class="stats">
+    <div class="glass ticks stat"><div class="label"><i></i>Tip deflection, FEM</div>
+      <div class="num acc" id="s-fem">-</div><div class="sub" id="s-fem-sub">-</div></div>
+    <div class="glass stat"><div class="label"><i></i>Euler-Bernoulli</div>
+      <div class="num" id="s-eb">-</div><div class="sub" id="s-eb-sub">-</div></div>
+    <div class="glass stat has-ring"><div><div class="label"><i class="g"></i>Devices agree</div>
+      <div class="num" id="s-dev">-</div><div class="sub" id="s-dev-sub">-</div></div>
+      <svg class="ring g" viewBox="0 0 36 36" aria-hidden="true"><circle class="bg" cx="18" cy="18" r="15"/>
+        <circle class="fg" id="ring" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="94.25"/></svg></div>
+  </div>
+  <div class="stats">
+    <div class="glass stat"><div class="label"><i></i>Stress, FEM</div><div class="num" id="s-sf">-</div><div class="sub">top fiber, mid-span</div></div>
+    <div class="glass stat"><div class="label"><i></i>Stress, M c / I</div><div class="num" id="s-sa">-</div><div class="sub">closed form</div></div>
+    <div class="glass stat"><div class="label"><i></i>Mesh</div><div class="num" id="s-mesh">-</div><div class="sub" id="s-mesh-sub">-</div></div>
+  </div>
+
+  <div class="grid">
+    <section class="glass card" aria-labelledby="h-plot">
+      <h2 id="h-plot"><i></i>Deflection along the span</h2>
+      <svg class="plot" id="plot" viewBox="0 0 640 300" role="img" aria-label="Deflection along the beam: FEM nodes and the Euler-Bernoulli curve"></svg>
+      <div class="legend"><span><b class="f"></b>FEM, mid-height nodes</span><span><b></b>Euler-Bernoulli, P x&sup2;(3L - x) / 6EI</span></div>
+      <p class="note" id="case-sub"></p>
+    </section>
+    <section class="glass card" aria-labelledby="h-ver">
+      <h2 id="h-ver"><i></i>Verify in this browser</h2>
+      <div class="verdict" id="verdict" aria-live="polite">Not checked yet</div>
+      <ul class="checks" id="checks"></ul>
+      <div class="acts">
+        <button class="btn primary" id="verify">Verify</button>
+        <a class="btn quiet" id="download" download>Download certificate</a>
+      </div>
+      <p class="note" id="rerun-note"></p>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="glass card" aria-labelledby="h-cert">
+      <h2 id="h-cert"><i></i>Certificate</h2>
+      <dl class="rows" id="cert-rows"></dl>
+    </section>
+    <section class="glass card" aria-labelledby="h-tamper">
+      <h2 id="h-tamper"><i></i>Try to fool it</h2>
+      <label class="sub" for="tamper" style="display:block;margin:0 0 6px">Change any character of the certificate, or load a downloaded one, then verify this text.</label>
+      <textarea id="tamper" spellcheck="false"></textarea>
+      <div class="acts">
+        <button class="btn" id="verify-text">Verify this text</button>
+        <label class="btn quiet" style="cursor:pointer">Load a file<input type="file" id="file" accept="application/json,.json" hidden></label>
+        <button class="btn quiet" id="reset">Reset</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="how" aria-label="How it works">
+    <div class="glass card"><h2><i></i>Compute</h2><p><code>compute.mapreduce@1</code> sends the load case to two machines with different processors. Each runs <code>physics.fem@1</code>, a plane-stress solver written so that every platform gets the same bits, and signs what it got with its own key.</p></div>
+    <div class="glass card"><h2><i></i>Certify</h2><p><code>cert.issue@1</code> signs only when two independent keys report the same output hash. The certificate pins the solver source by its SHA-256 and names the input and output as <code>ce-blob</code> content ids.</p></div>
+    <div class="glass card"><h2><i></i>Check</h2><p><code>cert.verify@1</code> is the same Rust code, compiled to WebAssembly. It runs here, offline, with no server: signatures, hashes, the closed-form bound and a full re-run of the solver.</p></div>
+  </section>
+
+  <footer class="credits">Apache-2.0. Source, the cells and how to run them yourself: <a href="https://github.com/ce-net/demo-verified-result">github.com/ce-net/demo-verified-result</a></footer>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  let ex = null, keys = null, index = [], cur = null, cert = null;
+
+  const themeBtn = $("theme");
+  const setTheme = t => { if (t === "light") document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme;
+    themeBtn.textContent = t === "light" ? "Dark" : "Light"; try { localStorage.setItem("ce-theme", t) } catch (e) {} };
+  themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+  setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+
+  const call = (fn, obj) => {
+    const b = enc.encode(typeof obj === "string" ? obj : JSON.stringify(obj));
+    const p = ex.buf(b.length);
+    new Uint8Array(ex.memory.buffer, p, b.length).set(b);
+    const n = ex[fn](b.length);
+    return JSON.parse(dec.decode(new Uint8Array(ex.memory.buffer, ex.out_ptr(), n)));
+  };
+  const short = s => { const t = String(s).split(":").pop(); return t.slice(0, 12) + "..." };
+  const fmt = (x, d) => Number(x).toFixed(d);
+  const tick = (el, to, d, unit) => {
+    const t0 = performance.now(), from = 0;
+    const step = now => { const k = Math.min(1, (now - t0) / 700), e = 1 - Math.pow(1 - k, 3);
+      el.innerHTML = fmt(from + (to - from) * e, d) + (unit ? `<small>${unit}</small>` : "");
+      if (k < 1) requestAnimationFrame(step) };
+    requestAnimationFrame(step);
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+
+  function plot(c) {
+    const inp = c.input, L = inp.l_mm, E = inp.e_mpa, I = inp.t_mm * inp.h_mm ** 3 / 12, P = inp.p_n;
+    const line = c.result.line_mm.map(Number), n = line.length - 1;
+    const W = 640, H = 300, l = 54, r = 14, t = 16, b = 34, max = Math.max(...line, P * L ** 3 / (3 * E * I)) * 1.08;
+    const X = x => l + (W - l - r) * x / L, Y = v => t + (H - t - b) * v / max;
+    let s = "";
+    for (let k = 0; k <= 4; k++) { const v = max * k / 4; s += `<line class="grid" x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l - 6}" y="${Y(v) + 3}" text-anchor="end">${fmt(v, v < 1 ? 2 : 1)}</text>` }
+    for (let k = 0; k <= 4; k++) { const x = L * k / 4; s += `<text x="${X(x)}" y="${H - b + 16}" text-anchor="middle">${Math.round(x)}</text>` }
+    s += `<text x="${W - r}" y="${H - 4}" text-anchor="end">x, mm</text><text x="${l - 6}" y="${t - 4}" text-anchor="end">mm</text>`;
+    s += `<line class="axis" x1="${l}" x2="${W - r}" y1="${t}" y2="${t}"/><line class="axis" x1="${l}" x2="${l}" y1="${t}" y2="${H - b}"/>`;
+    let d = "";
+    for (let k = 0; k <= 120; k++) { const x = L * k / 120, v = P * x * x * (3 * L - x) / (6 * E * I); d += (k ? "L" : "M") + X(x).toFixed(1) + " " + Y(v).toFixed(1) }
+    s += `<path class="eb" d="${d}"/>`;
+    const every = Math.max(1, Math.round(n / 40));
+    line.forEach((v, i) => { if (i % every === 0 || i === n) s += `<circle class="fem" cx="${X(L * i / n).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2.6"/>` });
+    $("plot").innerHTML = s;
+  }
+
+  function show(c, meta) {
+    cert = c;
+    const a = c.analytic, inp = c.input;
+    tick($("s-fem"), +c.result.tip_mm, 4, "mm");
+    $("s-fem-sub").textContent = `${(Number(a.rel_err_tip) * 100).toFixed(2)} % from closed form, limit ${Number(a.tolerance) * 100} %`;
+    tick($("s-eb"), +a.tip_eb_mm, 4, "mm");
+    $("s-eb-sub").textContent = `Timoshenko ${fmt(a.tip_timoshenko_mm, 4)} mm`;
+    const keysN = new Set(c.nodes.map(n => n.pub)).size;
+    $("s-dev").innerHTML = `${keysN}<small>/ ${c.nodes.length}</small>`;
+    $("s-dev-sub").textContent = "same output hash";
+    $("ring").setAttribute("stroke-dashoffset", 94.25 * (1 - keysN / Math.max(2, c.nodes.length)));
+    tick($("s-sf"), +c.result.sigma_mid_mpa, 2, "MPa");
+    tick($("s-sa"), +a.sigma_mid_mpa, 2, "MPa");
+    $("s-mesh").innerHTML = `${inp.nx} x ${inp.ny}<small>elements</small>`;
+    $("s-mesh-sub").textContent = `${2 * (inp.nx + 1) * (inp.ny + 1)} unknowns`;
+    $("case-sub").textContent = meta ? `${meta.title}: ${meta.sub}. E = ${inp.e_mpa} MPa, nu = ${inp.nu_milli / 1000}. Clamped root, tip load as a shear traction.` : "";
+    plot(c);
+    const rows = [
+      ["Solver", `${esc(c.code_ref.api)}<br><small>${esc(c.code_ref.ref)}</small>`],
+      ["Input", esc(c.input_cid)],
+      ["Output", esc(c.output_cid)],
+      ...c.nodes.map((n, i) => [`Device ${i + 1}`, `${esc(n.device_class)}<br><small>${esc(n.pub.slice(0, 24))}... · ${n.ms} ms</small>`]),
+      ["Issuer", `${esc(c.issuer.slice(0, 24))}...<br><small>${esc(c.issued_at)}</small>`],
+    ];
+    $("cert-rows").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    $("tamper").value = JSON.stringify(c, null, 1);
+    $("download").href = URL.createObjectURL(new Blob([JSON.stringify(c, null, 1)], {type: "application/json"}));
+    $("download").setAttribute("download", `certificate-${meta ? meta.id : "result"}.json`);
+    $("verdict").textContent = "Not checked yet"; $("verdict").className = "verdict"; $("checks").innerHTML = ""; $("rerun-note").textContent = "";
+  }
+
+  function verify(certObj) {
+    if (!ex) return;
+    const t0 = performance.now();
+    const r = call("verify", {cert: certObj, issuer: keys.issuer, rerun: true});
+    const ms = performance.now() - t0;
+    $("verdict").textContent = r.ok ? "Verified" : "Does not verify";
+    $("verdict").className = "verdict " + (r.ok ? "ok" : "bad");
+    $("checks").innerHTML = r.checks.map(c => `<li class="${c.ok ? "ok" : "bad"}"><i></i><div><b>${esc(c.name)}</b><span>${esc(c.detail)}</span></div></li>`).join("");
+    $("rerun-note").textContent = `Checked in ${ms.toFixed(0)} ms in this browser, including a full re-solve in WebAssembly.`;
+    document.body.dataset.verified = r.ok ? "ok" : "bad";
+    return r;
+  }
+
+  function select(i) {
+    cur = index[i];
+    [...$("cases").children].forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
+    fetch(`certs/${cur.id}.json`).then(r => r.json()).then(c => show(c, cur));
+    try { localStorage.setItem("verified-case", cur.id) } catch (e) {}
+  }
+
+  $("verify").onclick = () => cert && verify(cert);
+  $("verify-text").onclick = () => {
+    let c; try { c = JSON.parse($("tamper").value) } catch (e) {
+      $("verdict").textContent = "Does not verify"; $("verdict").className = "verdict bad";
+      $("checks").innerHTML = `<li class="bad"><i></i><div><b>parse</b><span>${esc(e.message)}</span></div></li>`; document.body.dataset.verified = "bad"; return }
+    verify(c);
+  };
+  $("reset").onclick = () => cert && ($("tamper").value = JSON.stringify(cert, null, 1));
+  $("file").onchange = e => { const f = e.target.files[0]; if (f) f.text().then(t => { $("tamper").value = t; $("verify-text").click() }) };
+
+  Promise.all([
+    fetch("verify.wasm").then(r => r.arrayBuffer()).then(b => WebAssembly.instantiate(b, {})).then(m => { ex = m.instance.exports }),
+    fetch("keys.json").then(r => r.json()).then(k => { keys = k }),
+    fetch("certs/index.json").then(r => r.json()).then(x => { index = x }),
+  ]).then(() => {
+    $("cases").innerHTML = index.map((c, i) => `<button aria-pressed="false" title="${esc(c.sub)}">${esc(c.title)}</button>`).join("");
+    [...$("cases").children].forEach((b, i) => b.onclick = () => select(i));
+    let start = 0; try { const s = new URLSearchParams(location.search).get("case") || localStorage.getItem("verified-case"); const k = index.findIndex(c => c.id === s); if (k >= 0) start = k } catch (e) {}
+    select(start);
+    if (new URLSearchParams(location.search).has("autoverify")) setTimeout(() => $("verify").click(), 900);
+  }).catch(e => { $("verdict").innerHTML = `<span class="err">Could not load the verifier: ${esc(e.message)}</span>` });
+})();
+</script>
+</body>
+</html>

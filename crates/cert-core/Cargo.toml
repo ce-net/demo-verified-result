@@ -1,0 +1,16 @@
+[package]
+name = "cert-core"
+description = "cert.issue@1 and cert.verify@1: sign and check a physics.fem@1 result (native and wasm)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+fem-core = { path = "../fem-core" }
+ed25519-dalek = { version = "2.2", default-features = false, features = ["std"] }
+sha2 = { version = "0.10", default-features = false }
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
