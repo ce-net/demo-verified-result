@@ -5,7 +5,7 @@ beam by the finite element method, get the same output bytes and sign them. A ce
 solver source, the input and the output. Any browser can then check every signature and re-run the
 solver itself, compiled to WebAssembly from the same Rust file, and get the same hash.
 
-Live page: https://ce-net.com/demos/verified
+Public page: https://ce-net.com/demos/verified (goes live after the next site deploy)
 
 ![The page after Verify](docs/screenshot.png)
 
